@@ -203,6 +203,37 @@
         </div>
     </div>
 
+    <!-- Bottom Music Player Bar -->
+    <div id="bottom-music-player">
+        <audio id="bg-audio" src="music/forntpage.mp3" preload="auto" loop></audio>
+        <div class="player-container">
+            <div class="player-left">
+                <div class="disc-wrapper">
+                    <div class="disc">
+                        <i class="fa-solid fa-compact-disc"></i>
+                    </div>
+                </div>
+                <div class="song-info">
+                    <span class="song-name">Welcome Melody 🌸</span>
+                    <span class="song-artist">Anuradha's Birthday Special</span>
+                </div>
+            </div>
+            
+            <div class="player-center">
+                <button id="player-play-btn" class="player-btn" aria-label="Play/Pause">
+                    <i class="fa-solid fa-play"></i>
+                </button>
+            </div>
+            
+            <div class="player-right">
+                <div class="progress-container" id="player-progress-container">
+                    <div class="progress-bar" id="player-progress-bar"></div>
+                </div>
+                <span class="time-remaining" id="player-time-remaining">-00:00</span>
+            </div>
+        </div>
+    </div>
+
 </body>
 <script>
     let datetxt = "13 August";
@@ -304,6 +335,99 @@
     close.addEventListener('click', function () {
         boxmail.classList.remove('active')
     })
+
+    // Bottom Music Player logic
+    const audio = document.getElementById('bg-audio');
+    const playBtn = document.getElementById('player-play-btn');
+    const playerBar = document.getElementById('bottom-music-player');
+    const progressBar = document.getElementById('player-progress-bar');
+    const progressContainer = document.getElementById('player-progress-container');
+    const timeRemaining = document.getElementById('player-time-remaining');
+    const disc = document.querySelector('.disc');
+    
+    let userPaused = false;
+    
+    // Show player bar
+    setTimeout(() => {
+        playerBar.classList.add('show');
+    }, 1000);
+    
+    // Try to play audio automatically
+    function tryPlay() {
+        if (!userPaused) {
+            audio.play().then(() => {
+                updatePlayState(true);
+            }).catch(err => {
+                console.log("Autoplay blocked by browser. Waiting for user interaction.");
+            });
+        }
+    }
+    
+    window.addEventListener('load', tryPlay);
+    
+    // Fallback: play on first user interaction
+    document.addEventListener('click', () => {
+        if (audio.paused && !userPaused) {
+            audio.play().then(() => {
+                updatePlayState(true);
+            }).catch(err => console.log("Play failed:", err));
+        }
+    }, { once: true });
+    
+    // Toggle play/pause
+    playBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // prevent triggering the document-wide click handler
+        if (audio.paused) {
+            audio.play().then(() => {
+                userPaused = false;
+                updatePlayState(true);
+            });
+        } else {
+            audio.pause();
+            userPaused = true;
+            updatePlayState(false);
+        }
+    });
+    
+    function updatePlayState(isPlaying) {
+        if (isPlaying) {
+            playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+            disc.style.animationPlayState = 'running';
+        } else {
+            playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+            disc.style.animationPlayState = 'paused';
+        }
+    }
+    
+    // Update progress and remaining time
+    audio.addEventListener('timeupdate', updateProgress);
+    audio.addEventListener('durationchange', updateProgress);
+    
+    function updateProgress() {
+        if (!audio.duration) return;
+        
+        // Progress bar width
+        const progressPercent = (audio.currentTime / audio.duration) * 100;
+        progressBar.style.width = `${progressPercent}%`;
+        
+        // Remaining time calculation
+        const timeLeft = audio.duration - audio.currentTime;
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = Math.floor(timeLeft % 60);
+        timeRemaining.textContent = `-${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+    
+    // Seek audio on progress bar click
+    progressContainer.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const width = progressContainer.clientWidth;
+        const clickX = e.offsetX;
+        const duration = audio.duration;
+        
+        if (duration) {
+            audio.currentTime = (clickX / width) * duration;
+        }
+    });
 </script>
 
 </html>

@@ -1,8 +1,8 @@
 // Playlist definition
 const playlist = [
-  { id: 1, name: "-------------- 🌸 ", path: "music/1.mp3" },
-  { id: 2, name: "-------------- 💕 ", path: "music/2.mp3" },
-  { id: 3, name: "-------------- ⭐️ ", path: "music/3.mp3" }
+  { id: 1, name: "-------------- 🌸 ", path: "music/music1.mp3" },
+  { id: 2, name: "-------------- 💕 ", path: "music/music2.mp3" },
+  { id: 3, name: "-------------- ⭐️ ", path: "music/music3.mp3" }
 ];
 
 let currentTrackIndex = 0;
